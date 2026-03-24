@@ -24,7 +24,14 @@
     "nodemon": "^3.1.0"
   },
   "jest": {
-    "transform": {}
+    "transform": {},
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
   },
   "engines": {
     "node": ">=20.0.0"
