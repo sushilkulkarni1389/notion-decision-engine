@@ -210,6 +210,12 @@ Runs the daily audit check (8am) and monthly pattern report (1st of month):
 node src/index.js
 ```
 
+Once running, the agent operates automatically:
+- **Every day at 8am** — checks Notion for decisions whose Review Date is today or overdue, runs the audit, and writes the Audit Report page back into Notion
+- **1st of every month at 9am** — aggregates all recent audits and generates a Monthly Pattern Report page in Notion
+
+You and your team only need to do two things manually: log decisions and log outcomes. Everything else is automatic.
+
 ### Capture a decision
 
 Describe a decision in plain text — Claude structures it into Notion automatically:
@@ -234,15 +240,46 @@ node src/index.js report
 
 ---
 
+## Running in Production
+
+For the agent to wake up automatically every day, it needs to run as a persistent background process on your machine or server. The easiest way is PM2:
+
+```bash
+# Install PM2 globally
+npm install -g pm2
+
+# Start the agent as a background process
+pm2 start src/index.js --name "decision-engine"
+
+# Save the process list so it survives reboots
+pm2 save
+
+# Set PM2 to start automatically on system boot
+pm2 startup
+```
+
+Useful PM2 commands:
+
+```bash
+pm2 status                        # Check if the agent is running
+pm2 logs decision-engine          # View live logs
+pm2 restart decision-engine       # Restart after config changes
+pm2 stop decision-engine          # Stop the agent
+```
+
+Once running with PM2, the full loop is genuinely automatic. Your team logs decisions and outcomes in Notion — the agent handles the rest, every morning at 8am, without anyone touching the terminal.
+
+---
+
 ## Quick Demo (seed data)
 
-To run the full loop without manual data entry:
+To run the full loop in one command — wipes all databases, seeds 3 realistic decisions with outcomes, runs all audits, and generates the monthly pattern report:
 
 ```bash
 node scripts/seedTestData.js
 ```
 
-This creates 3 realistic decisions with outcomes already linked in Notion, then prints the exact commands to run the audits. After the audits complete, run `node src/index.js report` to generate the monthly pattern report.
+At the end it prints direct Notion links to every page it created.
 
 ---
 
